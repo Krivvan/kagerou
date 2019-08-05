@@ -5,7 +5,7 @@ const CODENAME = 'Lost-day Hours'
 const DESCRIPTION = '\'今日も夕ご飯のことを考える\''
 
 const CONFIG_DEFAULT = {
-  lang: 'ko',
+  lang: 'en',
   style: {
     // body
     'resize-factor': 1,
@@ -46,7 +46,8 @@ const CONFIG_DEFAULT = {
         'deal.per_second',
         'deal.critical',
         'deal.direct',
-        'deal.crit_direct'
+        'deal.crit_direct',
+        'deal.percentile'
       ]
     }, {
       id: 1,
@@ -111,6 +112,7 @@ const CONFIG_DEFAULT = {
     '_deal-last30': 3.5,
     '_deal-last60': 3.5,
     '_deal-last180': 3.5,
+    '_deal-percentile': 2.5,
     '_heal-critical': 2,
     '_tank-damage': 4,
     '_tank-heal': 4,
@@ -165,7 +167,8 @@ const CONFIG_DEFAULT = {
       dps: 2,
       hps: 2,
       accuracy: 2,
-      critical: 0
+      critical: 0,
+      percntile: 2
     },
     merge_pet: true,
     myname: [],
@@ -222,7 +225,8 @@ const COLUMN_SORTABLE = [
   'tank.damage',
   'tank.heal',
   'heal.per_second',
-  'heal.total'
+  'heal.total',
+  'deal.percentile'
 ]
 const COLUMN_MERGEABLE = [
   'encdps', 'damage', 'damage%',
@@ -231,7 +235,7 @@ const COLUMN_MERGEABLE = [
   'enchps', 'healed', 'healed%',
   'heals', 'critheals', 'cures',
   'powerdrain', 'powerheal',
-  'Last10DPS', 'Last30DPS', 'Last60DPS'
+  'Last10DPS', 'Last30DPS', 'Last60DPS', 'Percentile'
 ]
 const COLUMN_USE_LARGER = {
   'MAXHIT': ['MAXHIT', 'maxhit'],
@@ -420,6 +424,32 @@ const COLUMN_INDEX = {
         _ = pFloat(_)
         return isNaN(_)? '0' : +_.toFixed(conf.format.significant_digit.dps)
       }
+    },
+    percentile: {
+      v: 'Percentile',
+      f: (_,conf) => {
+        _ = pFloat(_);
+        var r = (isNaN(_) || _ === 0 || _ === -1) ? 'N/A' : +_.toFixed(conf.format.significant_digit.percentile)
+        var c = "";
+        if ( _ === 100) {
+          c = "#e5cc80"
+        }
+        else if (_ >= 95 && _ <= 99) {
+          c = "#ff8000";
+        }  else if (_ >= 75 && _ <= 94) {
+          c = "#a335ee";
+        } else if (_ >= 50 && _ <= 74) {
+          c = "#0070ff";
+        } else if (_ >= 25 && _ <= 49) {
+          c = "#1eff00";
+        } else if (_ <= 24) {
+          c = "#666";
+        } else {
+          c = "#ffffff";
+        }
+        var line = "<font color=" + c + ">" + r + "</font>";
+        return line;
+      }      
     }/*,
     last180: {
       v: _ => 'Last180DPS' in _? _.Last180 : NaN
